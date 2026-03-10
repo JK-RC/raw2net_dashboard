@@ -1,5 +1,7 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Cache-Control" content="no-store">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Raw2Net Analysis</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet">
@@ -193,13 +195,13 @@ td.num-raw{color:var(--text-dim);font-weight:400;}
 <body>
 
 <!-- MODAL -->
-<div class="modal-overlay open" id="modal-overlay">
+<div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">Update Dashboard Data</div>
     <div class="modal-sub">Upload a new JSON export to regenerate and download the updated HTML.</div>
 
     <div class="modal-label" style="display: none;">Password</div>
-    <input class="modal-input" type="password" id="modal-pw" placeholder="Enter password…" onkeydown="if(event.key==='Enter')modalNext()" style="display: none;">
+    <input autocomplete="off" class="modal-input" type="password" id="modal-pw" placeholder="Enter password…" onkeydown="if(event.key==='Enter')modalNext()" style="display: none;">
     <div class="modal-error" id="modal-error" style="display: none;">Incorrect password. Please try again.</div>
 
     <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)" style="display: block;">
@@ -263,22 +265,22 @@ td.num-raw{color:var(--text-dim);font-weight:400;}
         <div class="thr-item">
           <span class="thr-dot net"></span>
           <span class="thr-item-label">Net %  &lt;</span>
-          <div class="thr-iw"><input type="number" id="lim-net" value="70" min="0" max="100"><span class="suf">%</span></div>
+          <div class="thr-iw"><input autocomplete="off" type="number" id="lim-net" value="70" min="0" max="100"><span class="suf">%</span></div>
         </div>
         <div class="thr-item">
           <span class="thr-dot inc"></span>
           <span class="thr-item-label">InChange %  &gt;</span>
-          <div class="thr-iw"><input type="number" id="lim-inc" value="18" min="0" max="100"><span class="suf">%</span></div>
+          <div class="thr-iw"><input autocomplete="off" type="number" id="lim-inc" value="18" min="0" max="100"><span class="suf">%</span></div>
         </div>
         <div class="thr-item">
           <span class="thr-dot rev"></span>
           <span class="thr-item-label">Revoked %  &gt;</span>
-          <div class="thr-iw"><input type="number" id="lim-rev" value="5" min="0" max="100"><span class="suf">%</span></div>
+          <div class="thr-iw"><input autocomplete="off" type="number" id="lim-rev" value="5" min="0" max="100"><span class="suf">%</span></div>
         </div>
         <div class="thr-item">
           <span class="thr-dot den"></span>
           <span class="thr-item-label">Denied %  &gt;</span>
-          <div class="thr-iw"><input type="number" id="lim-den" value="8" min="0" max="100"><span class="suf">%</span></div>
+          <div class="thr-iw"><input autocomplete="off" type="number" id="lim-den" value="8" min="0" max="100"><span class="suf">%</span></div>
         </div>
         <button class="btn-apply" onclick="applyFilters()">Apply</button>
       </div>
@@ -1337,8 +1339,12 @@ function generateAndDownload(parsedData, rawJsonStr) {
   const yyyy = today.getFullYear();
   const dateStr = `${dd}.${mm}.${yyyy}`;
 
-  // Read current page HTML and splice in new data + new date
-  let src = document.documentElement.outerHTML;
+  // Clone DOM, strip any dynamically-created file inputs before capturing HTML
+  const clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll('input[type="file"]').forEach(el => el.remove());
+  const overlay = clone.querySelector('#modal-overlay');
+  if (overlay) overlay.classList.remove('open');
+  let src = clone.outerHTML;
 
   // Replace the RAW_DATA block — find the const RAW_DATA = ...;
   src = src.replace(
